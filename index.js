@@ -3,7 +3,17 @@ const cors= require("cors");
 const app=express();
 const models = require('./models');
 const multer= require("multer");
-const upload=multer({dest: 'uploads/'});
+//const upload=multer({dest: 'uploads/'});
+const upload=multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null,"uploads/" );
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname)
+    }
+  })
+});
 const port=8080;
 
 app.use(express.json());//json형식의 데이터 처리할수 있도록 설정하는 코드
@@ -12,6 +22,7 @@ app.use(cors({
   credentials: true
 }
 )) //브라우저 이슈 막기위한것
+app.use('/uploads', express.static('uploades'))
 
 app.get('/products', (req, res)=>{
   models.Product.findAll()
@@ -30,21 +41,22 @@ app.get('/products', (req, res)=>{
 
 app.post('/products', (req, res)=>{
   const body=req.body;
-  const {name, description, seller, price} =body;
-  if(!name|| !description|| !seller|| !price){
+  const {name, description, seller, price, imageUrl} =body;
+  if(!name|| !description|| !seller|| !price || !imageUrl){
     res.send("모든 필드값을 입력해주세요")
   }
   models.Product.create({
     name,
     description,
     price,
-    seller
+    seller,
+    imageUrl,
   }).then((result)=>{
     console.log('상품생성결과:',result )
-    res.send({result, })
+    res.send({product: result })
   }).catch((error)=>{
     console.error(error )
-    res.send('상품 업로드 실패 하였습니다')
+    res.status(400).send('상품 업로드 실패 하였습니다')
   })
 })
 
