@@ -16,6 +16,7 @@ if (config.use_env_variable) {
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
 
+// 모든 모델을 동적으로 로드
 fs
   .readdirSync(__dirname)
   .filter(file => {
@@ -31,11 +32,19 @@ fs
     db[model.name] = model;
   });
 
+// 모델 간 관계 설정
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
 });
+
+// 관계 설정 직접 추가
+db.User = db.User || require('./user')(sequelize, Sequelize.DataTypes);
+db.Comment = db.Comment || require('./comment')(sequelize, Sequelize.DataTypes);
+
+db.User.hasMany(db.Comment, { foreignKey: 'user_id', sourceKey: 'id' });
+db.Comment.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id' });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
