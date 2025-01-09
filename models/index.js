@@ -39,12 +39,8 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
-// 관계 설정 직접 추가
-db.User = db.User || require('./user')(sequelize, Sequelize.DataTypes);
-db.Comment = db.Comment || require('./comment')(sequelize, Sequelize.DataTypes);
 
-db.User.hasMany(db.Comment, { foreignKey: 'user_id', sourceKey: 'id' });
-db.Comment.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id' });
+
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

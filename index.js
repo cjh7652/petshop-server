@@ -5,7 +5,8 @@ const models = require('./models');
 const multer= require("multer");
 const jwt=require('jsonwebtoken');
 const crypto=require('crypto');
-const secretKey=crypto.randomBytes(32).toString('hex');
+const secretKey='dkfjoewkfnldksa11';
+
 //const upload=multer({dest: 'uploads/'});
 const upload = multer({
   storage: multer.diskStorage({
@@ -184,6 +185,92 @@ app.get('/users/check-id', (req, res)=>{
   })
 })
 
+//댓글생성
+app.post('/comments', (req, res) => {
+  const { post_id, content } = req.body;
+
+  models.Comment.create({ post_id,content })
+  .then((result)=>{
+    return res.status(201).json({ message:'성공', comment:result });
+    // return res.send( {result,} ) //뒤에 내용이 들어올 수 있을때는 "," 비워둠
+  })
+  .catch((err)=>{
+    console.log(err);
+    return res.status(500).json({ message: '서버 오류 발생' });
+  })
+});
+
+//댓글 전체 가져오기
+app.get('/comments', (req, res)=>{
+  models.Comment.findAll()
+  .then((result)=>{
+    console.log("Comments :", result);
+    res.send({
+      comments: result
+    })
+  })
+  .catch((error)=>{
+    console.error(error)
+    res.send("에러발생")
+  })
+})
+
+//댓글 생성
+/* app.post('/comments', (req, res) => {
+  const { content, post_id } = req.body;
+  const accessToken = req.headers.authorization?.split(' ')[1]; // Bearer 제거
+
+  if (!accessToken) {
+    return res.status(401).send({ message: '로그인이 필요합니다.' });
+  }
+
+  try {
+    const decoded = jwt.verify(accessToken, secretKey);
+    const user_id = decoded.id;
+
+    if (!content || !post_id) {
+      return res.status(400).send({ message: '댓글 내용 또는 게시글 ID가 없습니다.' });
+    }
+
+    models.Comment.create({
+      content,
+      post_id,
+    })
+      .then((result) => {
+        res.send({ success: true, comment: result });
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send('댓글 작성 실패');
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(401).send({ message: '인증 실패' });
+  }
+}); */
+
+//댓글 조회
+/* app.get('/products/:id/comments', (req, res) => {
+  const { id } = req.params;
+
+  models.Comment.findAll({
+    where: { post_id: id },
+    include: [
+      {
+        model: models.User,
+        attributes: ['name'], // 작성자의 이름만 포함
+      },
+    ],
+    order: [['createdAt', 'DESC']],
+  })
+    .then((comments) => {
+      res.send({ success: true, comments });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('댓글 조회 실패');
+    });
+}); */
 
 
 
