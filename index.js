@@ -189,6 +189,7 @@ app.get('/users/check-id', (req, res)=>{
 app.post('/comments', (req, res) => {
   const { post_id, content } = req.body;
 
+
   models.Comment.create({ post_id,content })
   .then((result)=>{
     return res.status(201).json({ message:'성공', comment:result });
@@ -213,64 +214,53 @@ app.get('/comments', (req, res)=>{
     console.error(error)
     res.send("에러발생")
   })
+});
+
+//댓글 수정
+app.put('/comments/:id', (req, res) =>{
+  const {id} = req.params;
+  const {content} = req.body;
+
+  if(!content){
+    return res.status(400).send({success:false, message: "수정할 내용을 입력해 주세요"})
+  }
+
+  models.Comment.update(
+    {content},
+    {where: {id}}
+  )
+  .then(([updated])=>{
+    if(updated){
+      res.send({success: true, message:"댓글이 수정되었습니다"})
+    }else{
+      res.status(404).send({success: false, message:"해당 댓글을 찾을수 없습니다."})
+    }
+  })
+  .catch((error)=>{
+    console.errror(error);
+    res.status(500).send({success: false, message:"댓글 수정 중 오류 발생"})
+  })
 })
 
-//댓글 생성
-/* app.post('/comments', (req, res) => {
-  const { content, post_id } = req.body;
-  const accessToken = req.headers.authorization?.split(' ')[1]; // Bearer 제거
+//댓글 삭제
+app.delete('/comments/:id', (req, res) => {
+  const {id} = req.params;
 
-  if (!accessToken) {
-    return res.status(401).send({ message: '로그인이 필요합니다.' });
-  }
-
-  try {
-    const decoded = jwt.verify(accessToken, secretKey);
-    const user_id = decoded.id;
-
-    if (!content || !post_id) {
-      return res.status(400).send({ message: '댓글 내용 또는 게시글 ID가 없습니다.' });
-    }
-
-    models.Comment.create({
-      content,
-      post_id,
-    })
-      .then((result) => {
-        res.send({ success: true, comment: result });
-      })
-      .catch((error) => {
-        console.error(error);
-        res.status(500).send('댓글 작성 실패');
-      });
-  } catch (error) {
-    console.error(error);
-    res.status(401).send({ message: '인증 실패' });
-  }
-}); */
-
-//댓글 조회
-/* app.get('/products/:id/comments', (req, res) => {
-  const { id } = req.params;
-
-  models.Comment.findAll({
-    where: { post_id: id },
-    include: [
-      {
-        model: models.User,
-        attributes: ['name'], // 작성자의 이름만 포함
-      },
-    ],
-    order: [['createdAt', 'DESC']],
+  models.Comment.destroy({
+      where: {id},
   })
-    .then((comments) => {
-      res.send({ success: true, comments });
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send('댓글 조회 실패');
-    });
-}); */
+  .then((deleted) => {
+    if(deleted){
+      res.send({success: true, message:"댓글이 삭제되었습니다."})
+    }else{
+      res.send({success: true, message:"해당 댓글을 찾을 수 없습니다."})
+    }
+  })
+  .catch((error) => {
+    console.error(error);
+    res.status(500).send({success:false, message:" 댓글 삭제 중 오류가 발생"})
+  })
+})
 
 
 
