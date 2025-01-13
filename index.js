@@ -5,7 +5,7 @@ const models = require('./models');
 const multer= require("multer");
 const jwt=require('jsonwebtoken');
 const crypto=require('crypto');
-const secretKey='dkfjoewkfnldksa11';
+const secretKey='dkfjoewkfnldksa1123245';
 
 //const upload=multer({dest: 'uploads/'});
 const upload = multer({
@@ -27,6 +27,8 @@ app.use(cors({
 }
 )) //브라우저 이슈 막기위한것
 app.use("/uploads", express.static("uploads"));
+
+
 
 app.get('/products', (req, res)=>{
   models.Product.findAll()
